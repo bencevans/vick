@@ -39,9 +39,10 @@ job "vick" {
       driver = "docker"
 
       config {
-        image = var.image
-        args  = ["--config", "/local/config.toml", "-v"]
-        ports = ["metrics"]
+        image      = var.image
+        force_pull = true
+        args       = ["--config", "/local/config.toml", "-v"]
+        ports      = ["metrics"]
 
         # Bind-mounting the host's D-Bus socket is how the container talks to
         # bluetoothd; no --privileged or host networking is required.
