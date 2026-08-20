@@ -8,7 +8,7 @@ from typing import Any
 import paho.mqtt.client as mqtt
 
 from vick.config import MqttConfig
-from vick.reporting.base import Reporter
+from vick.reporting.base import IntervalThrottle, Reporter
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +21,13 @@ class MqttReporter(Reporter):
             self._client.username_pw_set(config.username, config.password)
         self._client.connect(config.host, config.port)
         self._client.loop_start()
+        self._throttle = IntervalThrottle(config.min_interval)
 
     def report(
         self, device_name: str, device_type: str, address: str, metrics: dict[str, Any]
     ) -> None:
+        if not self._throttle.ready(address):
+            return
         self._client.publish(
             f"{self._topic_prefix}/{device_name}/address", json.dumps(address), retain=True
         )

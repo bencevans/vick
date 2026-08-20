@@ -72,6 +72,8 @@ database = "vick"
 token = "my-influxdb-token"
 org = "my-org"
 bucket = "vick"
+# Don't write more than once per device within this many seconds (0 = every reading)
+min_interval = 0
 
 [reporting.prometheus]
 enabled = false
@@ -87,6 +89,8 @@ username = ""
 password = ""
 # Metrics are published to "<topic_prefix>/<device name>/<metric>"
 topic_prefix = "vick"
+# Don't publish more than once per device within this many seconds (0 = every reading)
+min_interval = 0
 ```
 
 See [config.example.toml](config.example.toml) for a full annotated example,

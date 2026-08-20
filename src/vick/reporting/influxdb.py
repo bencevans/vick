@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Any
 
 from vick.config import InfluxDBConfig
-from vick.reporting.base import Reporter
+from vick.reporting.base import IntervalThrottle, Reporter
 
 logger = logging.getLogger(__name__)
 
@@ -55,10 +55,13 @@ class InfluxDBV1Reporter(Reporter):
         if config.username:
             token = base64.b64encode(f"{config.username}:{config.password}".encode()).decode()
             self._auth_header = f"Basic {token}"
+        self._throttle = IntervalThrottle(config.min_interval)
 
     def report(
         self, device_name: str, device_type: str, address: str, metrics: dict[str, Any]
     ) -> None:
+        if not self._throttle.ready(address):
+            return
         fields = {k: v for k, v in metrics.items() if v is not None}
         if not fields:
             return
@@ -92,10 +95,13 @@ class InfluxDBV2Reporter(Reporter):
         url = f"{config.protocol}://{config.host}:{config.port}"
         self._client = InfluxDBClient(url=url, token=config.token, org=config.org)
         self._write_api = self._client.write_api(write_options=SYNCHRONOUS)
+        self._throttle = IntervalThrottle(config.min_interval)
 
     def report(
         self, device_name: str, device_type: str, address: str, metrics: dict[str, Any]
     ) -> None:
+        if not self._throttle.ready(address):
+            return
         from influxdb_client import Point
 
         point = Point(device_type).tag("device", device_name).tag("address", address)

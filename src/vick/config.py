@@ -44,6 +44,8 @@ class InfluxDBConfig:
     token: str = ""
     org: str = ""
     bucket: str = "vick"
+    # Don't write more than once per device within this many seconds (0 = every reading)
+    min_interval: float = 0
 
 
 @dataclass
@@ -61,6 +63,8 @@ class MqttConfig:
     username: str = ""
     password: str = ""
     topic_prefix: str = "vick"
+    # Don't publish more than once per device within this many seconds (0 = every reading)
+    min_interval: float = 0
 
 
 @dataclass
