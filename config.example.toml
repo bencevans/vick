@@ -26,7 +26,16 @@ key = "0123456789abcdef0123456789abcdef"
 
 [reporting.influxdb]
 enabled = false
-url = "http://localhost:8086"
+# 1 for InfluxDB 1.x (username/password/database), 2 for InfluxDB 2.x (token/org/bucket)
+version = 2
+protocol = "http"
+host = "localhost"
+port = 8086
+# Used when version = 1
+username = ""
+password = ""
+database = "vick"
+# Used when version = 2
 token = "my-influxdb-token"
 org = "my-org"
 bucket = "vick"

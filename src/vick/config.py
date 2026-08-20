@@ -31,7 +31,16 @@ class ScanConfig:
 @dataclass
 class InfluxDBConfig:
     enabled: bool = False
-    url: str = "http://localhost:8086"
+    # 1 for InfluxDB 1.x (username/password/database), 2 for InfluxDB 2.x (token/org/bucket)
+    version: int = 2
+    protocol: str = "http"
+    host: str = "localhost"
+    port: int = 8086
+    # InfluxDB 1.x auth
+    username: str = ""
+    password: str = ""
+    database: str = "vick"
+    # InfluxDB 2.x auth
     token: str = ""
     org: str = ""
     bucket: str = "vick"
@@ -96,6 +105,12 @@ def load_config(path: str) -> Config:
         scan = ScanConfig(**raw.get("scan", {}))
     except TypeError as e:
         raise ConfigError(f"Invalid config option: {e}")
+
+    if influxdb.enabled:
+        if influxdb.version not in (1, 2):
+            raise ConfigError("reporting.influxdb.version must be 1 or 2")
+        if influxdb.version == 2 and not influxdb.token:
+            raise ConfigError("reporting.influxdb.token is required for version = 2")
 
     if not (influxdb.enabled or prometheus.enabled or mqtt.enabled):
         raise ConfigError(

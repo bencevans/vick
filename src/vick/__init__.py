@@ -15,9 +15,9 @@ logger = logging.getLogger("vick")
 def build_reporters(config: Config) -> list[Reporter]:
     reporters: list[Reporter] = []
     if config.influxdb.enabled:
-        from vick.reporting.influxdb import InfluxDBReporter
+        from vick.reporting.influxdb import create_influxdb_reporter
 
-        reporters.append(InfluxDBReporter(config.influxdb))
+        reporters.append(create_influxdb_reporter(config.influxdb))
     if config.prometheus.enabled:
         from vick.reporting.prometheus import PrometheusReporter
 
