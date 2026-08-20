@@ -1,0 +1,10 @@
+.venv
+.git
+.github
+__pycache__
+*.pyc
+.env
+*.toml
+!pyproject.toml
+config.toml
+config.example.toml
