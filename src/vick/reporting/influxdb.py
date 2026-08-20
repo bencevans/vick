@@ -56,11 +56,14 @@ class InfluxDBV1Reporter(Reporter):
             token = base64.b64encode(f"{config.username}:{config.password}".encode()).decode()
             self._auth_header = f"Basic {token}"
 
-    def report(self, device_name: str, device_type: str, metrics: dict[str, Any]) -> None:
+    def report(
+        self, device_name: str, device_type: str, address: str, metrics: dict[str, Any]
+    ) -> None:
         fields = {k: v for k, v in metrics.items() if v is not None}
         if not fields:
             return
-        line = _line_protocol(device_type, {"device": device_name}, fields)
+        tags = {"device": device_name, "address": address}
+        line = _line_protocol(device_type, tags, fields)
         query = urllib.parse.urlencode({"db": self._database, "precision": "s"})
         req = urllib.request.Request(
             f"{self._base_url}/write?{query}", data=line.encode(), method="POST"
@@ -90,10 +93,12 @@ class InfluxDBV2Reporter(Reporter):
         self._client = InfluxDBClient(url=url, token=config.token, org=config.org)
         self._write_api = self._client.write_api(write_options=SYNCHRONOUS)
 
-    def report(self, device_name: str, device_type: str, metrics: dict[str, Any]) -> None:
+    def report(
+        self, device_name: str, device_type: str, address: str, metrics: dict[str, Any]
+    ) -> None:
         from influxdb_client import Point
 
-        point = Point(device_type).tag("device", device_name)
+        point = Point(device_type).tag("device", device_name).tag("address", address)
         for key, value in metrics.items():
             if value is None:
                 continue

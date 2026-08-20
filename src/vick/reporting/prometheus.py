@@ -20,14 +20,18 @@ class PrometheusReporter(Reporter):
     def _gauge(self, key: str) -> Gauge:
         gauge = self._gauges.get(key)
         if gauge is None:
-            gauge = Gauge(f"vick_{key}", f"Victron {key}", ["device", "device_type"])
+            gauge = Gauge(f"vick_{key}", f"Victron {key}", ["device", "device_type", "address"])
             self._gauges[key] = gauge
         return gauge
 
-    def report(self, device_name: str, device_type: str, metrics: dict[str, Any]) -> None:
+    def report(
+        self, device_name: str, device_type: str, address: str, metrics: dict[str, Any]
+    ) -> None:
         for key, value in metrics.items():
             if isinstance(value, Enum):
                 value = value.value
             if not isinstance(value, (int, float)):
                 continue
-            self._gauge(key).labels(device=device_name, device_type=device_type).set(value)
+            self._gauge(key).labels(
+                device=device_name, device_type=device_type, address=address
+            ).set(value)

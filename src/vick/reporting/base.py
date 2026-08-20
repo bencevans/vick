@@ -8,7 +8,9 @@ from typing import Any
 
 class Reporter(abc.ABC):
     @abc.abstractmethod
-    def report(self, device_name: str, device_type: str, metrics: dict[str, Any]) -> None:
+    def report(
+        self, device_name: str, device_type: str, address: str, metrics: dict[str, Any]
+    ) -> None:
         """Publish a set of metrics read from a device."""
 
     def close(self) -> None:

@@ -129,7 +129,7 @@ class DeviceScanner(BaseScanner):
         logger.debug(f"Read '{config.name}' ({device_type}): {metrics}")
         for reporter in self._reporters:
             try:
-                reporter.report(config.name, device_type, metrics)
+                reporter.report(config.name, device_type, address, metrics)
             except Exception:
                 logger.exception(f"Reporter {type(reporter).__name__} failed for {config.name}")
 

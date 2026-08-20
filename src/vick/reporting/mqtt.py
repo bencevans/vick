@@ -22,7 +22,12 @@ class MqttReporter(Reporter):
         self._client.connect(config.host, config.port)
         self._client.loop_start()
 
-    def report(self, device_name: str, device_type: str, metrics: dict[str, Any]) -> None:
+    def report(
+        self, device_name: str, device_type: str, address: str, metrics: dict[str, Any]
+    ) -> None:
+        self._client.publish(
+            f"{self._topic_prefix}/{device_name}/address", json.dumps(address), retain=True
+        )
         for key, value in metrics.items():
             if value is None:
                 continue
