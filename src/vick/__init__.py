@@ -53,7 +53,9 @@ async def run(config: Config) -> None:
 )
 @click.option("-v", "--verbose", is_flag=True, help="Increase logging output.")
 def main(config_path: str, verbose: bool) -> None:
-    logging.basicConfig(level=logging.DEBUG if verbose else logging.INFO)
+    logging.basicConfig(level=logging.INFO)
+    # Keep third-party BLE library logs quiet; -v only affects vick's own logging.
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
     try:
         config = load_config(config_path)

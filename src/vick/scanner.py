@@ -69,6 +69,7 @@ class DeviceScanner(BaseScanner):
         self._devices_by_address = {d.address: d for d in devices}
         self._reporters = reporters
         self._known_devices: dict[str, Device] = {}
+        self._error_logged: set[str] = set()
 
     def _get_device(self, address: str, raw_data: bytes) -> Device | None:
         device = self._known_devices.get(address)
@@ -94,18 +95,22 @@ class DeviceScanner(BaseScanner):
 
         device = device_klass(config.key)
         self._known_devices[address] = device
+        logger.info(f"Identified '{config.name}' ({address}) as {device_klass.__name__}")
         return device
 
     def callback(self, ble_device, raw_data: bytes, advertisement) -> None:
         address = ble_device.address.lower()
         config = self._devices_by_address.get(address)
         if config is None:
+            logger.debug(f"Ignoring advertisement from unconfigured device {address}")
             return
+
+        logger.debug(f"Received advertisement from '{config.name}' ({address}): {raw_data.hex()}")
 
         try:
             device = self._get_device(address, raw_data)
         except UnknownDeviceError as e:
-            logger.error(e)
+            self._log_once(address, str(e))
             return
         if device is None:
             return
@@ -113,13 +118,22 @@ class DeviceScanner(BaseScanner):
         try:
             parsed = device.parse(raw_data)
         except AdvertisementKeyMismatchError:
-            logger.error(f"Advertisement key for '{config.name}' does not match its data")
+            self._log_once(
+                address, f"Advertisement key for '{config.name}' does not match its data"
+            )
             return
+        self._error_logged.discard(address)
 
         metrics = _extract_metrics(parsed)
         device_type = type(device).__name__
+        logger.debug(f"Read '{config.name}' ({device_type}): {metrics}")
         for reporter in self._reporters:
             try:
                 reporter.report(config.name, device_type, metrics)
             except Exception:
                 logger.exception(f"Reporter {type(reporter).__name__} failed for {config.name}")
+
+    def _log_once(self, address: str, message: str) -> None:
+        if address not in self._error_logged:
+            logger.error(message)
+            self._error_logged.add(address)
