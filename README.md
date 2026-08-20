@@ -91,8 +91,9 @@ vick --config config.toml
 
 ## Docker
 
-A prebuilt image is available as `ghcr.io/bencevans/vick`, or you can build it
-yourself with `docker build -t vick .`.
+A prebuilt multi-arch image (`linux/amd64` + `linux/arm64`, e.g. Raspberry Pi)
+is published to `ghcr.io/bencevans/vick` on every push to `main`, or you can
+build it yourself with `docker build -t vick .`.
 
 BLE access relies on the host's BlueZ stack over D-Bus (not the network
 stack), so the container just needs access to the system D-Bus socket. If
