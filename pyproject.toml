@@ -9,6 +9,11 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "victron-ble>=0.9.3",
+    "click>=8.1",
+    "tomli>=2.0; python_version < '3.11'",
+    "influxdb-client>=1.45",
+    "prometheus-client>=0.20",
+    "paho-mqtt>=2.1",
 ]
 
 [project.scripts]
