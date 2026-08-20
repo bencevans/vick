@@ -1,0 +1,47 @@
+# Example vick configuration file.
+# Copy to config.toml (or pass --config <path>) and edit for your setup.
+
+[scan]
+# BLE adapter to use (defaults to the system default adapter)
+adapter = "hci0"
+
+[[devices]]
+# Friendly name used as the metric/tag name for this device
+name = "starter-battery"
+# BLE MAC address of the device
+address = "AA:BB:CC:DD:EE:FF"
+# Advertisement decryption key, from the VictronConnect app
+# (Settings > Product Info > Show Instant Readout details)
+key = "abcdef0123456789abcdef0123456789"
+# Optional: force a device type instead of auto-detecting from the
+# advertisement. One of: ac_charger, battery_monitor, battery_sense,
+# dc_energy_meter, dcdc_converter, inverter, lynx_smart_bms, multirs,
+# orion_xs, smart_battery_protect, smart_lithium, solar_charger, vebus
+# type = "battery_monitor"
+
+[[devices]]
+name = "solar-charger"
+address = "11:22:33:44:55:66"
+key = "0123456789abcdef0123456789abcdef"
+
+[reporting.influxdb]
+enabled = false
+url = "http://localhost:8086"
+token = "my-influxdb-token"
+org = "my-org"
+bucket = "vick"
+
+[reporting.prometheus]
+enabled = false
+# Address the /metrics HTTP endpoint listens on
+host = "0.0.0.0"
+port = 9101
+
+[reporting.mqtt]
+enabled = false
+host = "localhost"
+port = 1883
+username = ""
+password = ""
+# Metrics are published to "<topic_prefix>/<device name>/<metric>"
+topic_prefix = "vick"
