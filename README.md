@@ -85,14 +85,15 @@ vick --config config.toml
 A prebuilt image is available as `ghcr.io/bencevans/vick`, or you can build it
 yourself with `docker build -t vick .`.
 
-BLE access relies on the host's BlueZ stack over D-Bus, so the container needs
-host networking and access to the system D-Bus socket:
+BLE access relies on the host's BlueZ stack over D-Bus (not the network
+stack), so the container just needs access to the system D-Bus socket. If
+you're exposing a reporter port (e.g. Prometheus), publish it with `-p`:
 
 ```sh
 docker run --rm \
-  --network host \
   -v /var/run/dbus:/var/run/dbus \
   -v "$(pwd)/config.toml:/config/config.toml:ro" \
+  -p 9101:9101 \
   vick
 ```
 
