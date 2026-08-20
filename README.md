@@ -11,15 +11,24 @@ Victron BLE monitoring tool with reporting to InfluxDB, Prometheus and MQTT.
 
 ## Installation
 
+Vick is distributed as a Docker image, published to `ghcr.io/bencevans/vick`
+for both `linux/amd64` and `linux/arm64` (e.g. Raspberry Pi):
+
 ```sh
-uv tool install vick
+docker pull ghcr.io/bencevans/vick
 ```
+
+Alternatively, build it yourself with `docker build -t vick .`.
+
+BLE access relies on the host's BlueZ stack over D-Bus (not the network
+stack), so this only works on Linux hosts with BlueZ (e.g. Raspberry Pi OS) —
+Docker Desktop on macOS/Windows cannot pass through Bluetooth adapters.
 
 ## Configuration
 
 Vick is configured with a [TOML](https://toml.io/) file. By default it looks
-for `config.toml` in the current directory; pass a different path with
-`vick --config /path/to/config.toml`.
+for `config.toml` in the current directory (`/config/config.toml` inside the
+container); pass a different path with `vick --config /path/to/config.toml`.
 
 A device must be listed under `[[devices]]` before Vick will read it. Each
 device needs its BLE MAC address and the advertisement decryption key from the
@@ -85,27 +94,13 @@ including the list of supported device `type` overrides.
 
 ## Usage
 
-```sh
-vick --config config.toml
-```
-
-## Docker
-
-A prebuilt multi-arch image (`linux/amd64` + `linux/arm64`, e.g. Raspberry Pi)
-is published to `ghcr.io/bencevans/vick` on every push to `main`, or you can
-build it yourself with `docker build -t vick .`.
-
-BLE access relies on the host's BlueZ stack over D-Bus (not the network
-stack), so the container just needs access to the system D-Bus socket. If
-you're exposing a reporter port (e.g. Prometheus), publish it with `-p`:
+The container just needs access to the host's D-Bus socket to reach BlueZ.
+If you're exposing a reporter port (e.g. Prometheus), publish it with `-p`:
 
 ```sh
 docker run --rm \
   -v /var/run/dbus:/var/run/dbus \
   -v "$(pwd)/config.toml:/config/config.toml:ro" \
   -p 9101:9101 \
-  vick
+  ghcr.io/bencevans/vick
 ```
-
-This only works on Linux hosts with BlueZ (e.g. Raspberry Pi OS) — Docker
-Desktop on macOS/Windows cannot pass through Bluetooth adapters.
